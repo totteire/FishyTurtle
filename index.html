@@ -1,0 +1,274 @@
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+<script src="jquery-turtle.js"></script>
+<script src="jquery.gamequery-0.5.1.js"></script>
+<script type="text/javascript">
+
+
+	$(function(){
+		var SCREEN_WIDTH = window.innerWidth - 8;
+		var SCREEN_HEIGHT = window.innerHeight - 8;
+		var REFRESH_RATE = 15;
+		var playerAnimation = new Array();
+		
+		function player(nodeId){
+			this.id = nodeId;
+			this.dom = $('#'+nodeId);
+			this.direction = "";
+			this.life = 10;
+			this.speed = 250;
+			this.bulletSpeed = 10;
+			this.moveDist = 5;
+			this.nbBullet = 999;
+			this.getsHurt = function(){
+				this.life -= 1;
+				$('#'+this.id+'Score').html(this.life);
+				if(this.life <= 0){
+					this.die();
+					this.life = 0;
+				}
+			}
+			this.die = function(){
+				this.dom.effect('explode');
+				var msg = 'GAME OVER\n'+this.id+' loses :(';
+				var t = setTimeout(function(){alert(msg)}, 500);
+				this.dom.remove();
+			}
+			this.goRight = function(){
+				var nextpos = parseInt(this.dom.css("left")) + this.moveDist;
+				if(nextpos < SCREEN_WIDTH - 100)
+					this.dom.css("left", ""+nextpos+"px");
+			}
+			this.goLeft = function(){
+				var nextpos = parseInt(this.dom.css("left")) - this.moveDist;
+				if(nextpos > 0)
+					this.dom.css("left", ""+nextpos+"px");
+			}
+			this.goUp = function(){
+			var nextpos = parseInt(this.dom.css("top")) - this.moveDist;
+				if(nextpos > 0)
+					this.dom.css("top", ""+nextpos+"px");
+			}
+			this.goDown = function(){
+				var nextpos = parseInt(this.dom.css("top")) + this.moveDist;
+				if(nextpos < SCREEN_HEIGHT - 100){
+					this.dom.css("top", ""+nextpos+"px");
+				}
+			}
+			this.turnRight = function(){
+				this.dom.mirror(false);
+				this.dom.turnto(0);
+				this.direction = 'right';
+			}
+			this.turnLeft = function(){
+				this.dom.mirror(true);
+				this.dom.turnto(0);
+				this.direction = 'left';
+			}
+			this.turnUp = function(){
+				if(this.dom.mirror())
+					this.dom.turnto(90);
+				else
+					this.dom.turnto(270);
+				this.direction = 'up';
+			}
+			this.turnDown = function(){
+				if(this.dom.mirror())
+					this.dom.turnto(270);
+				else
+					this.dom.turnto(90);
+				this.direction = 'down';
+			}
+	
+			this.shoot = function(){
+				if(this.nbBullet > 0){
+					var playerposx = parseInt(this.dom.css("left"));
+					var playerposy = parseInt(this.dom.css("top"));
+					var missileName = this.id + Math.ceil(Math.random() * 1000);
+					$("#playerMissileLayer").addSprite(missileName, {animation: missile, posx: playerposx + 50, posy: playerposy + 50, width: 36,height: 10});
+					$("#"+missileName).addClass("playerMissiles").addClass(this.id);
+					switch(this.direction){
+						case 'up':
+							$('#'+missileName).turnto(270);
+							break;
+						case 'down':
+							$('#'+missileName).turnto(90);
+							break;
+						case 'left':
+							$('#'+missileName).turnto(180);
+							break;
+						case 'right':
+							$('#'+missileName).turnto(0);
+							break;
+					}
+					this.nbBullet--;
+				}
+			}
+			// Affiche le score au chargement
+			$('#'+this.id+'Score').html(this.life);
+		}
+//		function Missile(DIRECTION, SPEED){
+//			this.speed = SPEED;
+//			this.direction = DIRECTION;
+//			
+//		}
+		
+		playerAnimation["fish"] = new $.gameQuery.Animation({imageURL: "./img/fish.png"});
+		playerAnimation["turtle"] = new $.gameQuery.Animation({imageURL: "./img/Turtle.png"});
+		
+		missile = new $.gameQuery.Animation({imageURL: "./img/player_missile.png", numberOfFrame: 6, delta: 10, rate: 90, type: $.gameQuery.ANIMATION_VERTICAL});
+		missileExploding = new $.gameQuery.Animation({imageURL: "./img/explosion.png", numberOfFrame: 16, delta: 64, rate: 50, type: $.gameQuery.ANIMATION_HORIZONTAL});
+		
+		$("#playground").playground({height: SCREEN_HEIGHT, width: SCREEN_WIDTH, keyTracker: true})
+			.addGroup("players", {width: SCREEN_WIDTH, height: SCREEN_HEIGHT})
+				.addSprite("player1",{animation: playerAnimation["fish"], posx: 0, posy: SCREEN_HEIGHT / 2 - 50, width: 100, height: 100})
+				.addSprite("player2", {animation: playerAnimation["turtle"], posx: SCREEN_WIDTH - 100, posy: SCREEN_HEIGHT / 2 - 50, width: 100, height: 100 }).end()
+			.addGroup("playerMissileLayer",{width: SCREEN_WIDTH, height: SCREEN_HEIGHT});
+			
+				
+		// Fonction éxécuté toute les 15ms
+		$.playground().registerCallback(function(){
+			if(jQuery.gameQuery.keyTracker[37]){ //this is left! (<-)
+				player1.goLeft();
+			}
+			if(jQuery.gameQuery.keyTracker[39]){ //this is right! (->)
+				player1.goRight();
+			}
+			if(jQuery.gameQuery.keyTracker[38]){ //this is up! (up)
+				player1.goUp();
+			}
+			if(jQuery.gameQuery.keyTracker[40]){ //this is down! (down)
+				player1.goDown();
+			}
+			if(jQuery.gameQuery.keyTracker[81]){ //this is left! (a)
+				player2.goLeft();
+			}
+			if(jQuery.gameQuery.keyTracker[68]){ //this is right! (d)
+				player2.goRight();
+			}
+			if(jQuery.gameQuery.keyTracker[90]){ //this is up! (z)
+				player2.goUp();
+			}
+			if(jQuery.gameQuery.keyTracker[83]){ //this is down! (s)
+				player2.goDown();
+			}
+			
+			$('.playerMissiles').each(function(){
+				var position = $(this).position();
+				if ((position.left < -$(this).width()) || (position.left > SCREEN_WIDTH) || (position.top < -$(this).height()) || (position.top > SCREEN_HEIGHT)){
+					$(this).remove();
+					return;
+				}
+				switch ($(this).direction()){
+					case 0://going right
+						$(this).css('left', '' + (position.left + 10) + 'px');
+						break;
+					case 180://going left
+						$(this).css('left', '' + (position.left - 10) + 'px');
+						break;
+					case 90://going down
+						$(this).css('top', '' + (position.top + 10) + 'px');
+						break;
+					case 270://going up
+						$(this).css('top', '' + (position.top - 10) + 'px');
+						break;
+				}
+				if($(this).hasClass('player2') && $(this).touches(player1.dom)){
+//					$(this).setAnimation(missileExploding, function(){$(this).remove();});
+					$(this).remove();
+					player1.getsHurt();
+				}
+				if($(this).hasClass('player1') && $(this).touches(player2.dom)){
+//					$(this).setAnimation(missileExploding, function(){$(this).remove();});
+					$(this).remove();
+					player2.getsHurt();
+				}
+			});
+		}, REFRESH_RATE)
+		var player1 = new player('player1');
+		var player2 = new player('player2');
+		
+		$.playground().startGame();
+
+
+		$(document).keydown(function(e){
+			switch (e.which){
+				case 39://right (->)
+					player1.turnRight();
+					break;
+				case 37://left (<-)
+					player1.turnLeft();
+					break;
+				case 38://up (up)
+					player1.turnUp();
+					break;
+				case 40://down (down)
+					player1.turnDown();
+					break;
+				case 68://right (d)
+					player2.turnRight();
+					break;
+				case 81://left (q)
+					player2.turnLeft();
+					break;
+				case 90://up (z)
+					player2.turnUp();
+					break;
+				case 83://down (s)
+					player2.turnDown();
+					break;
+				case 16://shift right
+					player1.shoot();
+					break;
+				case 32://space
+					player2.shoot();
+					break;
+			}
+//			alert(e.which);
+		});
+	});
+		
+</script>
+
+<style type="text/css">
+
+body{
+/*	background-image: -moz-linear-gradient(bottom, rgb(20,0,196) 7%, rgb(45,78,224) 50%);*/
+/*	background-image: -webkit-linear-gradient(bottom, rgb(20,0,196) 7%, rgb(45,78,224) 50%);*/
+	background-color: blue;
+}
+.bullet{
+	position: absolute;
+	width: 10px;
+	height: 10px;
+	background-color: red;
+}
+.animal{
+	position: absolute;
+}
+.score{
+	position: fixed;
+	bottom: 0px;
+	width: 50px;
+	height: 50px;
+	border: 1px solid black;
+	font-size: 30px;
+	text-align: center;
+	font-weight: bold;
+	color: white;
+}
+
+</style>
+</head>
+<body>
+	<div id="playground">
+	</div>
+	
+	<div id="player2Score" class="score" style="left:0px;"></div>
+	<div id="player1Score" class="score" style="right:0px;"></div>
+
+</body>
+</html>
+
