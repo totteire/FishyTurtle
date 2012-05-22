@@ -120,9 +120,10 @@
 //		        'top' = 0
 		    }
 		    this.speed = 10;
+		    this.moving = true;
 		    this.reveal = function(){
-		        this.dom.css('background-image',"url('img/coeur.png')");
-		        
+		        this.dom.css('background-image',"url(" + this.img + ")");
+		        this.moving = false;
 		    }
 		}
         
@@ -215,9 +216,12 @@
 				}
 				if($(this).touches($(".playerMissiles"))){
 				    $(this)[0].pack.reveal();
-				}else{
-    				$(this).css('top','' + (position.top + 5) + 'px');
-				}
+                }
+//                if($(this).touches($(".player1"))){
+//                    $(this)[0].
+                }
+                if($(this)[0].pack.moving) 
+    			    $(this).css('top','' + (position.top + 5) + 'px');
 			});
 			$('.playerMissiles').each(function(){
 				var position = $(this).position();
