@@ -120,13 +120,16 @@
 //		        'top' = 0
 		    }
 		    this.speed = 10;
-		    this.direction = 3;
-		}		
+		    this.reveal = function(){
+		        this.dom.css('background-image',"url('img/coeur.png')");
+		        
+		    }
+		}
         
         function packVie(nodeId){
             this.__proto__.constructor(nodeId);
             this.ajoutVie = 5;
-            this.temps = 10;
+            this.img = "img/coeur.png";
         }
         packVie.prototype = new pack();
         
@@ -155,22 +158,23 @@
 		
 		playerAnimation["fish"] = new $.gameQuery.Animation({imageURL: "./img/fish.png"});
 		playerAnimation["turtle"] = new $.gameQuery.Animation({imageURL: "./img/Turtle.png"});
+		packvie =  new $.gameQuery.Animation({imageURL: "./img/chest.png"});
 		
 		missile = new $.gameQuery.Animation({imageURL: "./img/player_missile.png", numberOfFrame: 6, delta: 10, rate: 90, type: $.gameQuery.ANIMATION_VERTICAL});
 		missileExploding = new $.gameQuery.Animation({imageURL: "./img/explosion.png", numberOfFrame: 16, delta: 64, rate: 50, type: $.gameQuery.ANIMATION_HORIZONTAL});
-		packvie =  new $.gameQuery.Animation({imageURL: "./img/coeur.png"});
 		
 		$("#playground").playground({height: SCREEN_HEIGHT, width: SCREEN_WIDTH, keyTracker: true})
 			.addGroup("players", {width: SCREEN_WIDTH, height: SCREEN_HEIGHT})
 				.addSprite("player1",{animation: playerAnimation["fish"], posx: 0, posy: SCREEN_HEIGHT / 2 - 50, width: 100, height: 100})
 				.addSprite("player2", {animation: playerAnimation["turtle"], posx: SCREEN_WIDTH - 100, posy: SCREEN_HEIGHT / 2 - 50, width: 100, height: 100 })
 				.end()
-			.addGroup("playerMissileLayer",{width: SCREEN_WIDTH, height: SCREEN_HEIGHT})
+			.addGroup("playerMissileLayer",{width: SCREEN_WIDTH, height: SCREEN_HEIGHT}).end()
 			.addGroup("packLayer",{width: SCREEN_WIDTH, height: SCREEN_HEIGHT});
 			
-				
+		var i=0;		
 		// Fonction éxécuté toute les 15ms
 		$.playground().registerCallback(function(){
+		    i ++;
 			if(jQuery.gameQuery.keyTracker[37]){ //this is left! (<-)
 				player1.goLeft();
 			}
@@ -195,7 +199,26 @@
 			if(jQuery.gameQuery.keyTracker[83]){ //this is down! (s)
 				player2.goDown();
 			}
-			
+
+			if (i % 150 == 0){
+			    packName = "pack" + Math.ceil(Math.random() * 100);
+			    
+			    $("#packLayer").addSprite(packName, {animation: packvie, posx: Math.round(Math.random() * (SCREEN_WIDTH - 70)), posy: 0, width: 70,height: 70});
+			    $("#"+packName).addClass("pack");
+			    $("#"+packName)[0].pack = new packVie(packName);
+			}
+			$('.pack').each(function(){
+			    var position = $(this).position();
+				if ((position.left < -$(this).width()) || (position.left > SCREEN_WIDTH) || (position.top < -$(this).height()) || (position.top > SCREEN_HEIGHT)){
+					$(this).remove();
+					return;
+				}
+				if($(this).touches($(".playerMissiles"))){
+				    $(this)[0].pack.reveal();
+				}else{
+    				$(this).css('top','' + (position.top + 5) + 'px');
+				}
+			});
 			$('.playerMissiles').each(function(){
 				var position = $(this).position();
 				//console.log(position);
@@ -206,16 +229,16 @@
 				}
 				switch ($(this).direction()){
 					case 0://going right
-						$(this).css('left', '' + (position.left + 10) + 'px');
+						$(this).css('left', '' + (position.left + 20) + 'px');
 						break;
 					case 180://going left
-						$(this).css('left', '' + (position.left - 10) + 'px');
+						$(this).css('left', '' + (position.left - 20) + 'px');
 						break;
-					case 90://going downjquery.gamequery
-						$(this).css('top', '' + (position.top + 23) + 'px');
+					case 90://going down
+						$(this).css('top', '' + (position.top + 33) + 'px');
 						break;
 					case 270://going up
-						$(this).css('top', '' + (position.top + 3) + 'px');
+						$(this).css('top', '' + (position.top - 7) + 'px');
 						break;
 				}
 				if($(this).hasClass('player2') && $(this).touches(player1.dom)){
@@ -229,10 +252,14 @@
 					player2.getsHurt();
 				}
 			});
+			
 		}, REFRESH_RATE)
 		
 		var player1 = new player('player1');
 		var player2 = new player('player2');
+//		var $("#players").collection = 1;
+//		console.log($("#players").collection);
+        
 		
 		$.playground().startGame();
 
