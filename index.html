@@ -23,6 +23,10 @@
 			this.moveDist = 5;
 			this.nbBullet = 999;
 			this.isAllowToShoot = true;
+			this.regenerate = function(ajoutVie){
+			    this.life += ajoutVie;
+			    $('#'+this.id+'Score').html(this.life);
+			}
 			this.getsHurt = function(){
 				this.life -= 1;
 				$('#'+this.id+'Score').html(this.life);
@@ -131,6 +135,11 @@
             this.__proto__.constructor(nodeId);
             this.ajoutVie = 5;
             this.img = "img/coeur.png";
+            this.agir = function(player){
+                player.life += this.ajoutVie;
+                $('#'+player.id+'Score').html(player.life);
+                this.dom.remove();
+            }
         }
         packVie.prototype = new pack();
         
@@ -172,7 +181,8 @@
 			.addGroup("playerMissileLayer",{width: SCREEN_WIDTH, height: SCREEN_HEIGHT}).end()
 			.addGroup("packLayer",{width: SCREEN_WIDTH, height: SCREEN_HEIGHT});
 			
-		var i=0;		
+		var i=0;
+		var j=0;
 		// Fonction éxécuté toute les 15ms
 		$.playground().registerCallback(function(){
 		    i ++;
@@ -202,7 +212,8 @@
 			}
 
 			if (i % 150 == 0){
-			    packName = "pack" + Math.ceil(Math.random() * 100);
+			    packName = "pack" + j;
+			    j++;
 			    
 			    $("#packLayer").addSprite(packName, {animation: packvie, posx: Math.round(Math.random() * (SCREEN_WIDTH - 70)), posy: 0, width: 70,height: 70});
 			    $("#"+packName).addClass("pack");
@@ -214,25 +225,22 @@
 					$(this).remove();
 					return;
 				}
-				if($(this).touches($(".playerMissiles"))){
-				    $(this)[0].pack.reveal();
+				if(this.pack.dom.touches($(".playerMissiles"))){
+				    this.pack.reveal();
                 }
-                var pack = this;
+                pack = this.pack;
+                console.log(this.pack.id);
                 $('.player').each(function(){
-                    if($(this).touches(pack)){
-                        
+                    if(this.player.dom.touches(pack.dom)){
+                        console.log("player touches pack");
+                        pack.agir(this.player);
                     }
                 });
-                if($(this).touches($(".player"))){
-                    
-                }
-                if($(this)[0].pack.moving) 
+                if($(this)[0].pack.moving)
     			    $(this).css('top','' + (position.top + 5) + 'px');
 			});
 			$('.playerMissiles').each(function(){
 				var position = $(this).position();
-				//console.log(position);
-				//console.log($(this).width());
 				if ((position.left < -$(this).width()) || (position.left > SCREEN_WIDTH) || (position.top < -$(this).height()) || (position.top > SCREEN_HEIGHT)){
 					$(this).remove();
 					return;
@@ -271,9 +279,7 @@
 		player2.dom.addClass('player');
 		$('#player1')[0].player = player1;
 		$('#player2')[0].player = player2;
-//		var $("#players").collection = 1;
-//		console.log($("#players").collection);
-        
+
 		
 		$.playground().startGame();
 
