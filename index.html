@@ -217,8 +217,14 @@
 				if($(this).touches($(".playerMissiles"))){
 				    $(this)[0].pack.reveal();
                 }
-//                if($(this).touches($(".player1"))){
-//                    $(this)[0].
+                var pack = this;
+                $('.player').each(function(){
+                    if($(this).touches(pack)){
+                        
+                    }
+                });
+                if($(this).touches($(".player"))){
+                    
                 }
                 if($(this)[0].pack.moving) 
     			    $(this).css('top','' + (position.top + 5) + 'px');
@@ -261,6 +267,10 @@
 		
 		var player1 = new player('player1');
 		var player2 = new player('player2');
+		player1.dom.addClass('player');
+		player2.dom.addClass('player');
+		$('#player1')[0].player = player1;
+		$('#player2')[0].player = player2;
 //		var $("#players").collection = 1;
 //		console.log($("#players").collection);
         
