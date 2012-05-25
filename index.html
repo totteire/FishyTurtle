@@ -19,6 +19,7 @@
 			this.direction = "";
 			this.life = 10;
 //			this.speed = 250;
+            this.power = 1;
 			this.bulletSpeed = 10;
 			this.moveDist = 5;
 			this.nbBullet = 20;
@@ -95,7 +96,7 @@
 					var playerposy = parseInt(this.dom.css("top"));
 					var missileName = this.id + Math.ceil(Math.random() * 1000);
 					$("#playerMissileLayer").addSprite(missileName, {animation: missile, posx: playerposx + 50, posy: playerposy + 50, width: 36,height: 10});
-					$("#"+missileName).addClass("playerMissiles").addClass(this.id);
+					$("#"+missileName).addClass("playerMissiles " + this.id).attr('power',this.power);
 					switch(this.direction){
 						case 'up':
 							$('#'+missileName).turnto(270);
@@ -160,10 +161,12 @@
         
         function packDommage(nodeId){
             this.__proto__.constructor(nodeId);
-            this.ratioDommage = 2;
             this.img = "img/domage.png";
             this.agir = function(player){
                 console.log("packDommage");
+                joueur = player;
+                setTimeout(function(){joueur.power --;console.log("powerOver")},10000)
+                player.power ++;
                 this.dom.remove();
             }
         }
@@ -175,6 +178,9 @@
             this.img = "img/speed.png";
             this.agir = function(player){
                 console.log("packAjoutVitesse");
+                joueur = player;
+                vitesseAjoute = this.ajoutVitesse;
+                setTimeout(function(){joueur.moveDist -= vitesseAjoute;},10000)
                 player.moveDist += this.ajoutVitesse;
                 this.dom.remove();
             }
@@ -296,9 +302,13 @@
 				    var missile = this;
 				    $('.player').each(function(){
 				        if(this.player.dom.touches($(missile))  && !($(missile).hasClass(this.player.id))){
-                            $(missile).remove();
-				            this.player.getsHurt();
-				            console.log($(missile).attr('class'));
+                            var power = $(missile).attr('power');
+                            console.log("power="+power);
+                            for(var i=1; i<=power; i++){
+    				            this.player.getsHurt();
+    				            console.log(this.player.id + " hurt!");
+    				        }
+    				        $(missile).remove();
 				        }
 				    });
 				}
