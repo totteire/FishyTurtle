@@ -18,16 +18,14 @@
 			this.dom = $('#'+nodeId);
 			this.direction = "";
 			this.life = 10;
-//			this.speed = 250;
             this.power = 1;
-			this.bulletSpeed = 10;
 			this.moveDist = 5;
 			this.nbBullet = 20;
 			this.isAllowToShoot = true;
-			this.regenerate = function(ajoutVie){
-			    this.life += ajoutVie;
-			    $('#'+this.id+'Score').html(this.life);
-			}
+//			this.regenerate = function(ajoutVie){
+//			    this.life += ajoutVie;
+//			    $('#'+this.id+'Score').html(this.life);
+//			}
 			this.getsHurt = function(){
 				this.life -= 1;
 				$('#'+this.id+'Vie').html(this.life);
@@ -53,7 +51,7 @@
 					this.dom.css("left", ""+nextpos+"px");
 			}
 			this.goUp = function(){
-			var nextpos = parseInt(this.dom.css("top")) - this.moveDist;
+			    var nextpos = parseInt(this.dom.css("top")) - this.moveDist;
 				if(nextpos > 0)
 					this.dom.css("top", ""+nextpos+"px");
 			}
@@ -112,6 +110,7 @@
 							break;
 					}
 					this.nbBullet--;
+					$("#" + this.id + "nbMiss").html(this.nbBullet);
 				}
 			}
 			// Affiche le score au chargement
@@ -121,11 +120,6 @@
 		function pack(nodeId){
 		    this.id = nodeId;
 		    this.dom = $('#'+nodeId);
-		    this.position = {
-//		        'left' = 0,
-//		        'top' = 0
-		    }
-		    this.speed = 10;
 		    this.moving = true;
 		    this.reveal = function(){
 		        this.dom.css('background-image',"url(" + this.img + ")");
@@ -151,7 +145,6 @@
             this.ajouteMis = 5;
             this.img = "img/missile.png";
             this.agir = function(player){
-                console.log("packAjoutMissile");
                 player.nbBullet += this.ajouteMis;
                 $('#'+player.id+'nbMiss').html(player.nbBullet);
                 this.dom.remove();
@@ -163,10 +156,13 @@
             this.__proto__.constructor(nodeId);
             this.img = "img/domage.png";
             this.agir = function(player){
-                console.log("packDommage");
-                joueur = player;
-                setTimeout(function(){joueur.power --;console.log("powerOver")},10000)
                 player.power ++;
+                $("#" + player.id + "Power").html("x" + player.power);
+                joueur = player;
+                setTimeout(function(){
+                    joueur.power--;
+                    $("#" + joueur.id + "Power").html("x" + joueur.power);
+                },10000);
                 this.dom.remove();
             }
         }
@@ -177,17 +173,20 @@
             this.ajoutVitesse = 5;
             this.img = "img/speed.png";
             this.agir = function(player){
-                console.log("packAjoutVitesse");
-                joueur = player;
-                vitesseAjoute = this.ajoutVitesse;
-                setTimeout(function(){joueur.moveDist -= vitesseAjoute;},10000)
                 player.moveDist += this.ajoutVitesse;
+                joueur = player;
+                $("#" + joueur.id + "Vitesse").html("x" + joueur.moveDist/this.ajoutVitesse);
+                vitesseAjoute = this.ajoutVitesse;
+                setTimeout(function(){
+                    joueur.moveDist -= vitesseAjoute;
+                    $("#" + joueur.id + "Vitesse").html("x" + joueur.moveDist/vitesseAjoute);
+                },10000);
                 this.dom.remove();
             }
         }
         packVitesse.prototype = new pack();
         
-		
+        // Initialisation des éléments gameQuery
 		playerAnimation["fish"] = new $.gameQuery.Animation({imageURL: "./img/fish.png"});
 		playerAnimation["turtle"] = new $.gameQuery.Animation({imageURL: "./img/Turtle.png"});
 		packvie =  new $.gameQuery.Animation({imageURL: "./img/chest.png"});
@@ -203,8 +202,9 @@
 			.addGroup("playerMissileLayer",{width: SCREEN_WIDTH, height: SCREEN_HEIGHT}).end()
 			.addGroup("packLayer",{width: SCREEN_WIDTH, height: SCREEN_HEIGHT});
 			
-		var i=0;
-		var j=0;
+		
+		var i=0; // i est incrémenté à chaque controle soit tout les REFRESH_RATE ms
+		var packNum=0;
 		// Fonction éxécuté toute les 15ms
 		$.playground().registerCallback(function(){
 		    i ++;
@@ -233,14 +233,15 @@
 				player2.goDown();
 			}
 
+            // Création d'un pack soit REFRESH_RATE * 200 = 4secondes
 			if (i % 200 == 0){
-			    packName = "pack" + j;
-			    j++;
-			    
+			    packName = "pack" + packNum;
+			    packNum++;
+			    // ajout d'un sprite pack
 			    $("#packLayer").addSprite(packName, {animation: packvie, posx: Math.round(Math.random() * (SCREEN_WIDTH - 70)), posy: 0, width: 70,height: 70});
 			    $("#"+packName).addClass("pack "+packName);
-			    var rand = Math.round(Math.random() * 100);
-			    
+
+			    var rand = Math.round(Math.random() * 100); // création un entier aléatoir entre 0 et 100
 			    if(rand <= 25){
 			        $("#"+packName)[0].pack = new packVie(packName);
 			    }
@@ -393,6 +394,10 @@ body{
 	font-weight: bold;
 	color: white;
 }
+.weapon{
+    color:red;
+    font-size:50px;
+}
 
 </style>
 </head>
@@ -400,18 +405,18 @@ body{
 	<div id="playground">
 	</div>
 	<div class="info" style="left:0px;bottom:100px;"><img src="img/petitDomage.png"/></div>
-	<div id="player1Power" class="info player1Power" style="left:0px;bottom:100px;color:black;font-size:50px;">x1</div>
+	<div id="player1Power" class="info weapon player1Power" style="left:0px;bottom:100px;">x1</div>
 	<div class="info" style="left: 50px; bottom: 100px;"><img src="img/speed.png"/></div>
-	<div class="info" style="left: 50px; bottom: 100px;color:black;font-size:50px;">x1</div>
+	<div id="player1Vitesse" class="info" style="left: 50px; bottom: 100px;color:red;font-size:50px;">x1</div>
 	<div class="info" style="left: 0px; bottom: 50px;">vie</div>
 	<div class="info" style="right: 50px; bottom: 50px;">vie</div>
 	<div id="player1Vie" class="info" style="left:50px; bottom: 50px;"></div>
 	<div id="player2Vie" class="info" style="right:0px; bottom: 50px;"></div>
 	
 	<div class="info" style="right:50px;bottom:100px;"><img src="img/petitDomage.png"/></div>
-	<div class="info" style="right:50px;bottom:100px;color:black;font-size:50px;">x1</div>
+	<div id="player2Power" class="info" style="right:50px;bottom:100px;color:red;font-size:50px;">x1</div>
 	<div class="info" style="right:0px;bottom:100px;"><img src="img/speed.png"/></div>
-	<div class="info" style="right:0px;bottom:100px;color:black;font-size:50px;">x1</div>
+	<div id="player2Vitesse" class="info" style="right:0px;bottom:100px;color:red;font-size:50px;">x1</div>
 	<div class="info" style="left: 0px; bottom: 0px;"><img src="img/petitMissile.png"/></div>
 	<div class="info" style="right: 50px; bottom: 0px;"><img src="img/petitMissile.png"/></div>
 	<div id="player1nbMiss" class="info" style="left:50px; bottom: 0px;"></div>
