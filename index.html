@@ -110,7 +110,7 @@
 							break;
 					}
 					this.nbBullet--;
-					$("#" + this.id + "nbMiss").html(this.nbBullet);
+					$("#" + this.id + "nbMiss").html(this.nbBullet);    
 				}
 			}
 			// Affiche le score au chargement
@@ -138,7 +138,7 @@
                 this.dom.remove();
             }
         }
-        packVie.prototype = new pack();
+//        packVie.prototype = new pack();
         
         function packMissiles(nodeId){
             this.__proto__.constructor(nodeId);
@@ -150,7 +150,7 @@
                 this.dom.remove();
             }
         }
-        packMissiles.prototype = new pack();
+//        packMissiles.prototype = new pack();
         
         function packDommage(nodeId){
             this.__proto__.constructor(nodeId);
@@ -166,7 +166,7 @@
                 this.dom.remove();
             }
         }
-        packDommage.prototype = new pack();
+//        packDommage.prototype = new pack();
         
         function packVitesse(nodeId){
             this.__proto__.constructor(nodeId);
@@ -184,7 +184,7 @@
                 this.dom.remove();
             }
         }
-        packVitesse.prototype = new pack();
+//        packVitesse.prototype = new pack();
         
         // Initialisation des éléments gameQuery
 		playerAnimation["fish"] = new $.gameQuery.Animation({imageURL: "./img/fish.png"});
@@ -243,15 +243,19 @@
 
 			    var rand = Math.round(Math.random() * 100); // création un entier aléatoir entre 0 et 100
 			    if(rand <= 25){
+			        packVie.prototype = new pack();
 			        $("#"+packName)[0].pack = new packVie(packName);
 			    }
 			    if(rand >25 && rand <=50){
+			        packDommage.prototype = new pack();
 			        $("#"+packName)[0].pack = new packDommage(packName);
 			    }
 			    if(rand > 50 && rand <=75){
+			        packMissiles.prototype = new pack();
 			        $("#"+packName)[0].pack = new packMissiles(packName);
 			    }
 			    if(rand > 75){
+			        packVitesse.prototype = new pack();
 			        $("#"+packName)[0].pack = new packVitesse(packName);
 			    }
 			}
