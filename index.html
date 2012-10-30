@@ -162,6 +162,7 @@
                 setTimeout(function(){
                     joueur.power--;
                     $("#" + joueur.id + "Power").html("x" + joueur.power);
+                    console.log(joueur.id + ": powerOver");
                 },10000);
                 this.dom.remove();
             }
@@ -180,6 +181,7 @@
                 setTimeout(function(){
                     joueur.moveDist -= vitesseAjoute;
                     $("#" + joueur.id + "Vitesse").html("x" + joueur.moveDist/vitesseAjoute);
+                    console.log(joueur.id + ": VitesseOver");
                 },10000);
                 this.dom.remove();
             }
@@ -200,7 +202,8 @@
 				.addSprite("player2", {animation: playerAnimation["turtle"], posx: SCREEN_WIDTH - 100, posy: SCREEN_HEIGHT / 2 - 50, width: 100, height: 100 })
 				.end()
 			.addGroup("playerMissileLayer",{width: SCREEN_WIDTH, height: SCREEN_HEIGHT}).end()
-			.addGroup("packLayer",{width: SCREEN_WIDTH, height: SCREEN_HEIGHT});
+			.addGroup("packLayer",{width: SCREEN_WIDTH, height: SCREEN_HEIGHT
+		});
 			
 		
 		var i=0; // i est incrémenté à chaque controle soit tout les REFRESH_RATE ms
